@@ -56,7 +56,12 @@ def distance(point1, point2, radius=MEAN_EARTH_RADIUS):
     return radius * central_angle
     
 def load_json(path):
-    """Load JSON data from a file and return list of Customer objects."""
+    """Load JSON data from a file and return list of Customer objects.
+    
+    The JSON file is assumed to contain rows in the following format:
+    {"latitude": "52.986375", "user_id": 12, "name": "Jane Doe", "longitude": "-6.043701"}
+
+    """
     customers = []
     try:
         with open(path, 'r') as fd:
