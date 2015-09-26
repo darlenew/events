@@ -28,11 +28,16 @@ class Point(object):
         self.lat = float(lat)
         self.long = float(long)
 
+    def __str__(self):
+        return "(%f, %f)" % (self.lat, self.long)
+
+
 class Customer(object):
     def __init__(self, user_id, name=None, point=None):
         self.user_id = user_id
         self.name = name
         self.point = point
+
 
 def distance(point1, point2, radius=MEAN_EARTH_RADIUS):
     """Return the distance, in kilometers, between points 1 and 2."""
@@ -80,13 +85,36 @@ def invited(customers, origin, within=100):
     return sorted(nearby, key=lambda x: x.user_id)
 
 if __name__ == "__main__":
-    dublin_office = Point(53.3381985, -6.2592576)
-    json_path = "customers.txt"
+    import argparse, sys
 
-    customers = load_json(json_path)
-    invited_customers = invited(customers, dublin_office)
-    for c in invited_customers:
-        print c.user_id, c.name
+    DUBLIN_OFFICE = "53.3381985,-6.2592576"
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="path to customer data",
+                        action='store', dest='jsonfile', default='customers.txt')
+    parser.add_argument("--origin", help="calculate distance to customers from this point, e.g. 53.3381985,-6.2592576",
+                        action='store', default=DUBLIN_OFFICE, type=str)
+    parser.add_argument("--within", help="radius to search for customers from the origin",
+                        action='store', default=100, type=int)
+
+    options = parser.parse_args()
+    
+    jsonfile = options.jsonfile
+    try:
+        origin = Point(*options.origin.split(','))
+    except TypeError:
+        print "Specify point as a pair of comma-separated floats"
+        sys.exit(1)
+    within = options.within
+
+    customers = load_json(jsonfile)
+    invited_customers = invited(customers, origin, within=within)
+    if len(invited_customers) == 0:
+        print "No users are within %d km of %s" % (within, origin)
+    else:
+        print "The following users are within %d km of %s:" % (within, origin)
+        for c in invited_customers:
+            print c.user_id, c.name
         
 
     
